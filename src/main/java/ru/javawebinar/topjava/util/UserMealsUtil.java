@@ -8,8 +8,8 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TransferQueue;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -30,23 +30,20 @@ public class UserMealsUtil {
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        System.out.println("TODO return filtered list with excess. Implement by cycles");
-        List<UserMealWithExcess> mealsTo = new ArrayList<>();
+        List<UserMeal> userMeals = new ArrayList<>();
+        HashMap<String, Integer> caloriesForDate = new HashMap<>();
         for (UserMeal meal: meals) {
-//            System.out.println(meal);
-//            System.out.println(meal.getDateTime().getHour());
+            StringBuilder sb = new StringBuilder();
+            sb.append(meal.getDateTime().getYear()).append(meal.getDateTime().getMonth()).append(meal.getDateTime().getDayOfMonth());
+            caloriesForDate.put(sb.toString(), caloriesForDate.getOrDefault(sb.toString(), 0) + meal.getCalories());
             if ((meal.getDateTime().getHour() >= startTime.getHour()) &&
-                    (meal.getDateTime().getHour() <= endTime.getHour())) {
-                boolean excess = false;
-                int sumColories = 0;
-                for (UserMeal mealTmp: meals) {
-                    if (mealTmp.getDateTime().getMonth() == meal.getDateTime().getMonth() && mealTmp.getDateTime().getDayOfMonth() == meal.getDateTime().getDayOfMonth())
-                        sumColories += mealTmp.getCalories();
-
-                }
-                if (sumColories > caloriesPerDay) excess = true;
-                mealsTo.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), excess));
-            }
+                    (meal.getDateTime().getHour() <= endTime.getHour())) userMeals.add(meal);
+        }
+        List<UserMealWithExcess> mealsTo = new ArrayList<>();
+        for (UserMeal meal: userMeals) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(meal.getDateTime().getYear()).append(meal.getDateTime().getMonth()).append(meal.getDateTime().getDayOfMonth());
+            mealsTo.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), caloriesForDate.get(sb.toString()) > caloriesPerDay));
         }
         return mealsTo;
     }
